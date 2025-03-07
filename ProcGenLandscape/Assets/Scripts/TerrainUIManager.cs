@@ -7,15 +7,19 @@ public class TerrainUIManager : MonoBehaviour
     public TerrainGenerator terrainGenerator;
 
     // UI Elements
-    public Slider sizeXSlider, sizeYSlider, heightScaleSlider, scaleSlider, dampeningSlider, octavesSlider, persistenceSlider, lacunaritySlider, offsetXSlider, offsetYSlider;
+    public Slider sizeXSlider, sizeYSlider, heightScaleSlider, scaleSlider, dampeningSlider, octavesSlider, persistenceSlider, lacunaritySlider;
     public TMP_Dropdown colorSettingDropdown;
     public Button generateButton, resetButton;
+
+    // Presets
+    public GameObject defaultTerrain;
+    public GameObject preset1, preset2, preset3;
+    public Button preset1Button, preset2Button, preset3Button;
 
     // Store original values
     private int originalSizeX, originalSizeY, originalOctaves;
     private float originalHeightScale, originalScale, originalDampening, originalPersistence, originalLacunarity;
     private ColorSetting originalColorSetting;
-    private Vector2 originalOffset;
 
     void Start()
     {
@@ -29,7 +33,6 @@ public class TerrainUIManager : MonoBehaviour
         originalPersistence = terrainGenerator.persistence;
         originalLacunarity = terrainGenerator.lacunarity;
         originalColorSetting = terrainGenerator.colorSetting;
-        originalOffset = terrainGenerator.offset; // Store the original offset values
 
         // Set initial UI values
         sizeXSlider.value = originalSizeX;
@@ -42,10 +45,6 @@ public class TerrainUIManager : MonoBehaviour
         lacunaritySlider.value = originalLacunarity;
         colorSettingDropdown.value = (int)originalColorSetting;
 
-        // Initialize offset sliders with original values
-        offsetXSlider.value = originalOffset.x;
-        offsetYSlider.value = originalOffset.y;
-
         // Add listeners that update terrain in real time
         sizeXSlider.onValueChanged.AddListener(value => { terrainGenerator.sizeX = (int)value; UpdateTerrain(); });
         sizeYSlider.onValueChanged.AddListener(value => { terrainGenerator.sizeY = (int)value; UpdateTerrain(); });
@@ -57,10 +56,6 @@ public class TerrainUIManager : MonoBehaviour
         lacunaritySlider.onValueChanged.AddListener(value => { terrainGenerator.lacunarity = value; UpdateTerrain(); });
         colorSettingDropdown.onValueChanged.AddListener(value => { terrainGenerator.colorSetting = (ColorSetting)value; UpdateTerrain(); });
 
-        // Add listeners for the offset sliders
-        offsetXSlider.onValueChanged.AddListener(value => { terrainGenerator.offset = new Vector2(value, terrainGenerator.offset.y); UpdateTerrain(); });
-        offsetYSlider.onValueChanged.AddListener(value => { terrainGenerator.offset = new Vector2(terrainGenerator.offset.x, value); UpdateTerrain(); });
-
         // Generate button: Assign new seed & regenerate terrain
         generateButton.onClick.RemoveAllListeners();
         generateButton.onClick.AddListener(GenerateNewTerrain);
@@ -68,6 +63,16 @@ public class TerrainUIManager : MonoBehaviour
         // Reset button: Restore original values
         resetButton.onClick.RemoveAllListeners();
         resetButton.onClick.AddListener(ResetToOriginalValues);
+
+        // Preset buttons
+        preset1Button.onClick.AddListener(() => ActivatePreset(preset1));
+        preset2Button.onClick.AddListener(() => ActivatePreset(preset2));
+        preset3Button.onClick.AddListener(() => ActivatePreset(preset3));
+
+        // Ensure presets are disabled by default
+        preset1.SetActive(false);
+        preset2.SetActive(false);
+        preset3.SetActive(false);
     }
 
     void UpdateTerrain()
@@ -93,7 +98,6 @@ public class TerrainUIManager : MonoBehaviour
         terrainGenerator.persistence = originalPersistence;
         terrainGenerator.lacunarity = originalLacunarity;
         terrainGenerator.colorSetting = originalColorSetting;
-        terrainGenerator.offset = originalOffset; // Reset offset to original
 
         // Update UI to reflect original values
         sizeXSlider.value = originalSizeX;
@@ -106,11 +110,19 @@ public class TerrainUIManager : MonoBehaviour
         lacunaritySlider.value = originalLacunarity;
         colorSettingDropdown.value = (int)originalColorSetting;
 
-        // Update offset sliders
-        offsetXSlider.value = originalOffset.x;
-        offsetYSlider.value = originalOffset.y;
-
         // Regenerate terrain
         UpdateTerrain();
+    }
+
+    void ActivatePreset(GameObject selectedPreset)
+    {
+        // Disable default terrain and all presets
+        defaultTerrain.SetActive(false);
+        preset1.SetActive(false);
+        preset2.SetActive(false);
+        preset3.SetActive(false);
+
+        // Activate the selected preset
+        selectedPreset.SetActive(true);
     }
 }
